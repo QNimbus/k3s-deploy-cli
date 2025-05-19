@@ -5,6 +5,11 @@ import os
 from pathlib import Path
 from typing import List, Optional
 
+from dotenv import load_dotenv
+
+# Load environment variables from .env file if it exists
+load_dotenv()
+
 # Proxmox API Connection Details (to be sourced from environment variables)
 PROXMOX_HOST: Optional[str] = os.environ.get("PROXMOX_HOST")
 PROXMOX_PORT: int = int(os.environ.get("PROXMOX_PORT", "8006"))
