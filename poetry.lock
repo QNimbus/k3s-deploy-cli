@@ -130,6 +130,18 @@ files = [
 all = ["flake8 (>=7.1.1)", "mypy (>=1.11.2)", "pytest (>=8.3.2)", "ruff (>=0.6.2)"]
 
 [[package]]
+name = "proxmoxer"
+version = "2.2.0"
+description = "Python Wrapper for the Proxmox 2.x API (HTTP and SSH)"
+optional = false
+python-versions = "*"
+groups = ["main"]
+files = [
+    {file = "proxmoxer-2.2.0-py3-none-any.whl", hash = "sha256:7e4431fd38e1a9321eedf6d860ddc373fc2b29ce1845fa8b072d7580d99f6b90"},
+    {file = "proxmoxer-2.2.0.tar.gz", hash = "sha256:3ed63a58e5c0822841afdb3801f9d913a4996955c1c54f7319b5842ba2615006"},
+]
+
+[[package]]
 name = "requests"
 version = "2.32.3"
 description = "Python HTTP for Humans."
@@ -172,4 +184,4 @@ zstd = ["zstandard (>=0.18.0)"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12"
-content-hash = "fe991195848c093ef6292b540b72cf3a19dc549752dc8766a73749a2edfe00de"
+content-hash = "59455f997b5bac283f8b23a015638f6db0df2e41fd4047ed89cbdc5e4bb8e279"
