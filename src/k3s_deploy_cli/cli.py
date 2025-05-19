@@ -4,63 +4,84 @@ Command-Line Interface for the K3s Deployment Tool.
 Uses argparse to handle commands and options.
 """
 import argparse
+import subprocess  # <--- Added missing import here
 import sys
-import subprocess # <--- Added missing import here
 
-from .k3s_manager import K3sDeploymentManager
-from .logging_utils import logger, log_info_green, log_info_blue
-from . import config as app_config # To show current K3S_VERSION in help
+from . import config as app_config  # To show current K3S_VERSION in help
 from .exceptions import K3sDeployError
+from .k3s_manager import K3sDeploymentManager
+from .logging_utils import log_info_blue, log_info_green, logger
+
 
 def create_parser() -> argparse.ArgumentParser:
     """Creates and returns the argparse.ArgumentParser instance."""
     parser = argparse.ArgumentParser(
         description="Python tool to manage K3s deployments on Proxmox.",
-        formatter_class=argparse.RawTextHelpFormatter # For better help text formatting
+        formatter_class=argparse.RawTextHelpFormatter,  # For better help text formatting
     )
     # Keep a reference to the original K3S_VERSION for the help message
     original_k3s_version = app_config.K3S_VERSION
 
     # Subparsers for commands
-    subparsers = parser.add_subparsers(dest="command", title="Commands",
-                                       help="Action to perform. Use <command> -h for specific help.")
-    subparsers.required = True # A command must be provided
+    subparsers = parser.add_subparsers(
+        dest="command",
+        title="Commands",
+        help="Action to perform. Use <command> -h for specific help.",
+    )
+    subparsers.required = True  # A command must be provided
 
     # Start command
-    parser_start = subparsers.add_parser("start", help="Start Proxmox VMs with k3s role tags.")
+    parser_start = subparsers.add_parser(
+        "start", help="Start Proxmox VMs with k3s role tags."
+    )
     parser_start.set_defaults(func=handle_vm_action, action_name="start")
 
     # Stop command
-    parser_stop = subparsers.add_parser("stop", help="Gracefully shutdown Proxmox VMs with k3s role tags.")
+    parser_stop = subparsers.add_parser(
+        "stop", help="Gracefully shutdown Proxmox VMs with k3s role tags."
+    )
     parser_stop.set_defaults(func=handle_vm_action, action_name="stop")
 
     # Restart command
-    parser_restart = subparsers.add_parser("restart", help="Restart Proxmox VMs with k3s role tags.")
+    parser_restart = subparsers.add_parser(
+        "restart", help="Restart Proxmox VMs with k3s role tags."
+    )
     parser_restart.set_defaults(func=handle_vm_action, action_name="restart")
 
-    # Configure-IPs command
-    parser_configure_ips = subparsers.add_parser(
-        "configure-ips",
-        help="Assign static IPs from the defined range to VMs with k3s role tags."
+    # Configure VM command
+    parser_configure_vm = subparsers.add_parser(
+        "configure-vm",
+        help="Configure VMs with static IPs and SSH keys using cloud-init.",
     )
-    parser_configure_ips.set_defaults(func=handle_configure_ips)
+    parser_configure_vm.add_argument(
+        "--restart",
+        action="store_true",
+        help="Automatically restart VMs after configuration (required for cloud-init to apply changes).",
+    )
+    parser_configure_vm.add_argument(
+        "--force",
+        action="store_true",
+        help="Force update of cloud-init configuration even if no changes are detected.",
+    )
+    parser_configure_vm.set_defaults(func=handle_configure_vm)
 
     # Provision command
     parser_provision = subparsers.add_parser(
         "provision",
         help="Setup and provision the K3s cluster on all nodes.\n"
-             "(IMPORTANT: Assumes nodes are accessible, ideally via IPs configured by 'configure-ips')"
+        "(IMPORTANT: Assumes nodes are accessible, ideally via IPs configured by 'configure-vm')",
     )
     parser_provision.set_defaults(func=handle_provision)
 
     # Check-version command
     parser_check_version = subparsers.add_parser(
         "check-version",
-        help=f"Check if the current K3s version ({original_k3s_version}) is the latest available."
+        help=f"Check if the current K3s version ({original_k3s_version}) is the latest available.",
     )
     parser_check_version.add_argument(
-        "--update", action="store_true",
-        help="Ask to update the K3S_VERSION used by the script if a newer one is found."
+        "--update",
+        action="store_true",
+        help="Ask to update the K3S_VERSION used by the script if a newer one is found.",
     )
     parser_check_version.set_defaults(func=handle_check_version)
 
@@ -78,19 +99,27 @@ def create_parser() -> argparse.ArgumentParser:
 
     return parser
 
+
 def handle_vm_action(args: argparse.Namespace, manager: K3sDeploymentManager) -> None:
     """Handles start, stop, restart VM actions."""
     manager.perform_vm_action(args.action_name)
 
-def handle_configure_ips(args: argparse.Namespace, manager: K3sDeploymentManager) -> None:
-    """Handles the configure-ips action."""
-    manager.configure_ips()
+
+def handle_configure_vm(
+    args: argparse.Namespace, manager: K3sDeploymentManager
+) -> None:
+    """Handles the configure-vm action."""
+    manager.configure_vms(restart_after=args.restart, force=args.force)
+
 
 def handle_provision(args: argparse.Namespace, manager: K3sDeploymentManager) -> None:
     """Handles the provision action."""
     manager.provision_k3s_cluster()
 
-def handle_check_version(args: argparse.Namespace, manager: K3sDeploymentManager) -> None:
+
+def handle_check_version(
+    args: argparse.Namespace, manager: K3sDeploymentManager
+) -> None:
     """Handles the check-version action."""
     manager.check_k3s_version(ask_update=args.update)
 
@@ -104,18 +133,18 @@ def main_cli():
 
     try:
         log_info_blue(logger, f"Executing command: {args.command}")
-        args.func(args, manager) # Call the appropriate handler function
+        args.func(args, manager)  # Call the appropriate handler function
         log_info_green(logger, f"Command '{args.command}' completed successfully.")
 
     except K3sDeployError as e:
         logger.error(f"An application error occurred: {e}")
         # Check if it's a PveshCommandError and has stderr to print
-        pvesh_error_details = getattr(e, 'stderr', None)
+        pvesh_error_details = getattr(e, "stderr", None)
         if pvesh_error_details:
-             logger.error(f"  Underlying pvesh error output: {pvesh_error_details}")
+            logger.error(f"  Underlying pvesh error output: {pvesh_error_details}")
         sys.exit(1)
-    except SystemExit: # Allow sys.exit() to propagate
+    except SystemExit:  # Allow sys.exit() to propagate
         raise
-    except Exception as e: # Catch-all for unexpected errors
+    except Exception as e:  # Catch-all for unexpected errors
         logger.critical(f"An unexpected critical error occurred: {e}", exc_info=True)
         sys.exit(2)

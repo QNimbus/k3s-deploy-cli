@@ -197,7 +197,6 @@ The tool is structured as a Python package (`k3s_deploy_cli`) with a `src`-layou
 *   **K3s Upgrade Management:**
 *   **State Management for Provisioned IPs:** If IPs are assigned by cloud-init and not known beforehand, a mechanism to query/discover these IPs post-reboot and store them (perhaps in an updated `config.json` or a state file) will be crucial for provisioning.
 *   **Configuration of `KUBE_VIP_VERSION`, `VIP_ADDRESS`, `LOADBALANCER_IP_RANGE`:** Currently, these are static in `config.py`. They should be actively used during the provisioning phase.
-*   **Testing:** Implement unit tests (e.g., using `pytest` and `unittest.mock`) for `k3s_manager.py` and `proxmox_api.py` (mocking `proxmoxer` calls).
 *   **More Sophisticated `config.json` Handling:** Allow `config.json` to be the sole source of truth if present, potentially with richer VM details.
 *   **SSH Key Management:** For provisioning, consider how SSH keys will be managed/distributed to target VMs.
 

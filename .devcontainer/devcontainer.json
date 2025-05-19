@@ -1,0 +1,45 @@
+{
+    "name": "Python 3 Development Container",
+    "image": "mcr.microsoft.com/devcontainers/python:latest",
+    "features": {
+        "ghcr.io/devcontainers/features/git:1": {
+            "version": "latest"
+        },
+        "ghcr.io/devcontainers-extra/features/poetry:2": {
+            "version": "latest"
+        }
+    },
+    "postCreateCommand": {
+        "tree": "sudo apt-get update && sudo apt-get install -y tree",
+        "jujutsu": "sudo curl -L https://github.com/jj-vcs/jj/releases/download/v0.29.0/jj-v0.29.0-x86_64-unknown-linux-musl.tar.gz | sudo tar xz -C /usr/local/bin"
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-python.python",
+                "ms-python.vscode-pylance",
+                "ms-python.flake8",
+                "ms-python.black-formatter",
+                "charliermarsh.ruff",
+                "saoudrizwan.claude-dev"
+            ],
+            "settings": {
+                "python.defaultInterpreterPath": "/usr/local/bin/python",
+                "python.linting.enabled": true,
+                "python.linting.pylintEnabled": false,
+                "python.linting.flake8Enabled": true,
+                "python.formatting.provider": "none", // Use black or ruff formatter extension
+                "[python]": {
+                    "editor.defaultFormatter": "ms-python.black-formatter", // or "charliermarsh.ruff"
+                    "editor.formatOnSave": true,
+                    "editor.codeActionsOnSave": {
+                        "source.organizeImports": "explicit"
+                    }
+                },
+                "files.eol": "\n"
+            }
+        }
+    },
+    "forwardPorts": [],
+    "remoteUser": "vscode"
+}

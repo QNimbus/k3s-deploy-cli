@@ -1,0 +1,74 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Proxmox VE Node Configuration",
+    "description": "A schema defining the structure for Proxmox VE node and VM configurations.",
+    "type": "object",
+    "properties": {
+        "username": {
+            "type": "string",
+            "description": "The default username for accessing virtual machines."
+        },
+        "password": {
+            "type": "string",
+            "description": "The default password for accessing virtual machines."
+        },
+        "nodes": {
+            "type": "array",
+            "description": "A list of Proxmox VE nodes.",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "The unique identifier for the Proxmox VE node (e.g., 'pve1')."
+                    },
+                    "vms": {
+                        "type": "array",
+                        "description": "A list of virtual machines on this node.",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "vmid": {
+                                    "type": "integer",
+                                    "description": "The unique identifier for the virtual machine."
+                                },
+                                "name": {
+                                    "type": "string",
+                                    "description": "The name of the virtual machine."
+                                },
+                                "username": {
+                                    "type": "string",
+                                    "description": "The username for accessing the virtual machine."
+                                },
+                                "password": {
+                                    "type": "string",
+                                    "description": "The password for accessing the virtual machine."
+                                },
+                                "role": {
+                                    "type": "string",
+                                    "description": "The role of the virtual machine.",
+                                    "enum": [
+                                        "SERVER",
+                                        "AGENT",
+                                        "STORAGE"
+                                    ]
+                                }
+                            },
+                            "required": [
+                                "vmid",
+                                "role"
+                            ]
+                        }
+                    }
+                },
+                "required": [
+                    "id",
+                    "vms"
+                ]
+            }
+        }
+    },
+    "required": [
+        "nodes"
+    ]
+}

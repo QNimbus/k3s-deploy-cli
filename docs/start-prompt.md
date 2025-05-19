@@ -3,7 +3,7 @@
 **Project Context: `k3s-deploy-cli`**
 
 *   **Overall Goal:** Build a robust Python CLI application to automate the discovery, configuration, lifecycle management, and (eventually) K3s provisioning of Proxmox VE virtual machines.
-*   **Key Reference Documents (Mandatory Review):** You *must* ground your understanding and suggestions in the following documents located in the `/docs` directory. Treat them as the source of truth for project requirements, design, and current state:
+*   **Key Reference Documents (Mandatory Review):** You *must* ground your understanding and suggestions in the following documents located in the `.clinerules` directory. Treat them as the source of truth for project requirements, design, and current state:
     *   `technical-design.md`: This is the **primary architectural blueprint**. It details the system architecture, core components, data models, workflows, and configuration. All development must align with this document.
     *   `pdb.md` (Product Design Brief): This outlines the **project vision, target users, user scenarios, and core features** from a product perspective. Use this to understand the "why" behind features.
     *   `memory.md`: This document serves as our **shared short-term memory and decision log**. It summarizes recent progress, key decisions, and the immediate focus. You *must* consult this first to pick up from where we last left off and ensure continuity.
@@ -12,32 +12,30 @@
 *   **Current Project Structure (Dynamically Updated):**
 <structure>
 .
-├── README.md
-├── docs
+├── .clinerules
 │   ├── memory.md
 │   ├── pdb.md
-│   ├── start-prompt.md
-│   ├── start-prompt.md.backup
 │   ├── system-prompt.md
 │   └── technical-design.md
-├── poetry.lock
+├── docs
+│   └── start-prompt.md
+├── .env
 ├── pyproject.toml
-├── src
-│   └── k3s_deploy_cli
-│       ├── __init__.py
-│       ├── __main__.py
-│       ├── cli.py
-│       ├── config.py
-│       ├── exceptions.py
-│       ├── k3s_manager.py
-│       ├── logging_utils.py
-│       ├── models.py
-│       └── proxmox_api.py
-├── tests
-├── tree.txt
-└── update_docs.sh
+├── README.md
+├── schema.json
+└── src
+    └── k3s_deploy_cli
+        ├── cli.py
+        ├── config.py
+        ├── exceptions.py
+        ├── __init__.py
+        ├── k3s_manager.py
+        ├── logging_utils.py
+        ├── __main__.py
+        ├── models.py
+        └── proxmox_api.py
 
-5 directories, 20 files
+5 directories, 18 files
 </structure>
 
 * **Current Code Symbols (Dynamically Updated):**
@@ -57,37 +55,37 @@ def main()
 ## src/k3s_deploy_cli/cli.py
 
 ### 🔶 Function: `create_parser`
-- **Line:** 15
+- **Line:** 16
 ```python
 def create_parser() -> argparse.ArgumentParser
 ```
 
 ### 🔶 Function: `handle_vm_action`
-- **Line:** 81
+- **Line:** 103
 ```python
 def handle_vm_action(args: argparse.Namespace, manager: K3sDeploymentManager) -> None
 ```
 
-### 🔶 Function: `handle_configure_ips`
-- **Line:** 85
+### 🔶 Function: `handle_configure_vm`
+- **Line:** 108
 ```python
-def handle_configure_ips(args: argparse.Namespace, manager: K3sDeploymentManager) -> None
+def handle_configure_vm( args: argparse.Namespace, manager: K3sDeploymentManager ) -> None
 ```
 
 ### 🔶 Function: `handle_provision`
-- **Line:** 89
+- **Line:** 115
 ```python
 def handle_provision(args: argparse.Namespace, manager: K3sDeploymentManager) -> None
 ```
 
 ### 🔶 Function: `handle_check_version`
-- **Line:** 93
+- **Line:** 120
 ```python
-def handle_check_version(args: argparse.Namespace, manager: K3sDeploymentManager) -> None
+def handle_check_version( args: argparse.Namespace, manager: K3sDeploymentManager ) -> None
 ```
 
 ### 🔶 Function: `main_cli`
-- **Line:** 98
+- **Line:** 127
 ```python
 def main_cli()
 ```
@@ -126,64 +124,70 @@ def __str__(self) -> str
 ## src/k3s_deploy_cli/k3s_manager.py
 
 ### 🔷 Class: `K3sDeploymentManager`
-- **Line:** 19
+- **Line:** 23
 
 #### 🔶 Function: `__init__`
-- **Line:** 24
+- **Line:** 29
 ```python
 def __init__(self) -> None
 ```
 
 #### 🔶 Function: `_parse_vm_location`
-- **Line:** 33
+- **Line:** 38
 ```python
 def _parse_vm_location(self, location_str: str) -> Tuple[str, int]
 ```
 
 #### 🔶 Function: `_populate_node_lists`
-- **Line:** 44
+- **Line:** 52
 ```python
 def _populate_node_lists(self) -> None
 ```
 
 #### 🔶 Function: `load_nodes_from_config_file`
-- **Line:** 76
+- **Line:** 96
 ```python
 def load_nodes_from_config_file(self) -> bool
 ```
 
 #### 🔶 Function: `discover_nodes_by_tags`
-- **Line:** 132
+- **Line:** 159
 ```python
 def discover_nodes_by_tags(self) -> None
 ```
 
 #### 🔶 Function: `ensure_nodes_are_discovered`
-- **Line:** 214
+- **Line:** 261
 ```python
 def ensure_nodes_are_discovered(self, discover_if_empty: bool = True) -> None
 ```
 
 #### 🔶 Function: `check_k3s_version`
-- **Line:** 241
+- **Line:** 293
 ```python
 def check_k3s_version(self, ask_update: bool = False) -> None
 ```
 
 #### 🔶 Function: `perform_vm_action`
-- **Line:** 279
+- **Line:** 352
 ```python
 def perform_vm_action(self, action: str) -> None
 ```
 
-#### 🔶 Function: `configure_ips`
-- **Line:** 324
+#### 🔶 Function: `_get_ssh_public_key`
+- **Line:** 419
 ```python
-def configure_ips(self) -> None
+def _get_ssh_public_key(self) -> Optional[str]
+```
+
+#### 🔶 Function: `configure_vms`
+- **Line:** 480
+```python
+def configure_vms(self, restart_after: bool = False, force: bool = False) -> None
 ```
 
 #### 🔶 Function: `provision_k3s_cluster`
-- **Line:** 434
+- **Line:** 676
 ```python
 def provision_k3s_cluster(self) -> None
 ```
@@ -234,25 +238,25 @@ def log_info_light_blue(logger: logging.Logger, message: str, *args, **kwargs)
 ## src/k3s_deploy_cli/models.py
 
 ### 🔷 Class: `ProxmoxNode`
-- **Line:** 31
+- **Line:** 39
 
 ### 🔷 Class: `VMIdentifier`
-- **Line:** 8
+- **Line:** 9
 
 #### 🔶 Function: `__str__`
-- **Line:** 19
+- **Line:** 24
 ```python
 def __str__(self) -> str
 ```
 
 #### 🔶 Function: `__hash__`
-- **Line:** 22
+- **Line:** 29
 ```python
 def __hash__(self) -> int
 ```
 
 #### 🔶 Function: `__eq__`
-- **Line:** 25
+- **Line:** 32
 ```python
 def __eq__(self, other: object) -> bool
 ```
@@ -261,45 +265,45 @@ def __eq__(self, other: object) -> bool
 ## src/k3s_deploy_cli/proxmox_api.py
 
 ### 🔶 Function: `get_proxmox_client`
-- **Line:** 17
+- **Line:** 18
 ```python
 def get_proxmox_client() -> ProxmoxAPI
 ```
 
 ### 🔶 Function: `get_proxmox_cluster_nodes`
-- **Line:** 126
+- **Line:** 159
 ```python
 def get_proxmox_cluster_nodes() -> List[str]
 ```
 
 ### 🔶 Function: `get_vms_on_node`
-- **Line:** 145
+- **Line:** 182
 ```python
 def get_vms_on_node(node_name: str) -> List[int]
 ```
 
 ### 🔶 Function: `get_vm_config`
-- **Line:** 169
+- **Line:** 212
 ```python
 def get_vm_config(node_name: str, vmid: int) -> Dict[str, Any]
 ```
 
 ### 🔶 Function: `get_vm_status`
-- **Line:** 181
+- **Line:** 230
 ```python
 def get_vm_status(node_name: str, vmid: int) -> Dict[str, Any]
 ```
 
 ### 🔶 Function: `control_vm`
-- **Line:** 193
+- **Line:** 246
 ```python
 def control_vm(node_name: str, vmid: int, action: str) -> str
 ```
 
 ### 🔶 Function: `set_vm_network_config`
-- **Line:** 221
+- **Line:** 283
 ```python
-def set_vm_network_config( node_name: str, vmid: int, ipconfig_value: str, nameserver_value: Optional[str], searchdomain_value: Optional[str] ) -> str
+def set_vm_network_config( node_name: str, vmid: int, ipconfig_value: str, nameserver_value: Optional[str], searchdomain_value: Optional[str], ssh_key: Optional[str] = None, ) -> str
 ```
 </symbols>
 

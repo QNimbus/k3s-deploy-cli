@@ -2,22 +2,29 @@
 """Data models for the K3s deployment tool."""
 
 from dataclasses import dataclass, field
-from typing import Optional, List, Dict, Any
+from typing import Any, Dict, List, Optional
+
 
 @dataclass
 class VMIdentifier:
     """
     Represents a Proxmox VM with its location and role tags.
     """
+
     proxmox_node: str
     vmid: int
     name: Optional[str] = None
     ip_address: Optional[str] = None
+    status: Optional[str] = None  # To store VM power status (running, stopped, etc.)
     tags: List[str] = field(default_factory=list)
-    config: Dict[str, Any] = field(default_factory=dict) # Store raw VM config if needed
+    config: Dict[str, Any] = field(
+        default_factory=dict
+    )  # Store raw VM config if needed
 
     def __str__(self) -> str:
-        return f"{self.proxmox_node}:{self.vmid}" + (f" ({self.name})" if self.name else "")
+        return f"{self.proxmox_node}:{self.vmid}" + (
+            f" ({self.name})" if self.name else ""
+        )
 
     def __hash__(self) -> int:
         return hash((self.proxmox_node, self.vmid))
@@ -27,8 +34,10 @@ class VMIdentifier:
             return NotImplemented
         return (self.proxmox_node, self.vmid) == (other.proxmox_node, other.vmid)
 
+
 @dataclass
 class ProxmoxNode:
     """Represents a Proxmox physical node."""
+
     name: str
     vms: List[VMIdentifier] = field(default_factory=list)
